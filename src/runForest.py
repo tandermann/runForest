@@ -17,15 +17,15 @@ from sklearn.model_selection import train_test_split
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument('-mode', help='State if you want to train a model with training data ("train"), or load a trained model to predict category labels of unseen data ("predict")',choices=['train', 'predict'], default=None, required=True)
+p.add_argument('-mode', help='State if you want to train a model with feature data ("train"), or load a trained model to predict category labels of unseen data ("predict")',choices=['train', 'predict'], default=None, required=True)
 p.add_argument('-features', type=str, help='Path to feature-array (numerical values required) for training or prediction',required=True)
 p.add_argument('-rescaling_factors', type=str, help='Provide path to scaling array consisting of one rescaling-factor per feature-column. Alternatively provide a single value by which to rescale all features. If this flag is not provided each feature-column will be rescaled so that all values fall between 0 and 1.',default= 0)
 p.add_argument('-labels', type=str, help='[mode "train"] Path to class labels, required for training. If required for mode "predict", this array will be used to determine the values for -n_labels and -outlabels', default= 0)
 p.add_argument('-feature_indeces', type=str, help='Array of feature indices to select (in case not all features should be used for training or prediction)', default= 0)
 p.add_argument('-train_instance_indices', type=str, help='[mode "train"] Array of indices for selecting which instances should be used for training', default= 0)
 p.add_argument('-test_size', type=float, help='Fraction of data set aside for testing accuracy', default= 0.2)
-p.add_argument('-test_features', type=float, help='In case you have test features in a separate file, provide path here (disables -test_size flag)', default= 0)
-p.add_argument('-test_labels', type=float, help='Provide path to labels for the test features provided under -test_features flag', default= 0)
+p.add_argument('-test_features', type=str, help='In case you have test features in a separate file, provide path here (disables -test_size flag)', default= 0)
+p.add_argument('-test_labels', type=str, help='Provide path to labels for the test features provided under -test_features flag', default= 0)
 p.add_argument('-trained_model', type=str, help='[mode "predict"] Path to model weights of previously trained network', default= 0)
 p.add_argument('-outpath', type=str, help='Provide output path where all output files will be stored', default= 0)
 p.add_argument('-seed', type=int, help='Set a seed integer, used for initializing random forest and separating data into training and test set. Set to "random" (default) to draw a random integer between 0 and 1,000,000.', default = 'random')
@@ -106,7 +106,7 @@ if args.train_instance_indices:
     train_instance_indices = np.loadtxt(args.train_instance_indices,dtype=int)
     features = features[train_instance_indices,:]
     labels = labels[train_instance_indices]
-    
+
 if rescale:
     # if rescalign factors are provided, rescale the array accordingly
     scaled_features = features/rescaling_factors
@@ -182,11 +182,13 @@ if mode =='train':
     # train the model
     print('Training model, using %i features'%(selected_scaled_features_training.shape[1]))
     model_random_forest = RandomForestClassifier(random_state=random_seed,n_estimators=n_trees)
-    model_random_forest.fit(selected_scaled_features_training, labels_training)        
-    # check accuracy on test set
-    guessed_labels = model_random_forest.predict(selectes_scaled_features_test)
-    random_forest_accuracy = accuracy_score(labels_test, guessed_labels)
-    print('Accuracy of training on test set:', random_forest_accuracy)
+    model_random_forest.fit(selected_scaled_features_training, labels_training)
+    
+    if len(scaled_features_test) > 0:
+        # check accuracy on test set
+        guessed_labels = model_random_forest.predict(selectes_scaled_features_test)
+        random_forest_accuracy = accuracy_score(labels_test, guessed_labels)
+        print('Accuracy of training on test set:', random_forest_accuracy)
     # save the trained model for later predictions
     filename = os.path.join(outpath,'trained_model_RF_%i_%i_%i_%i.pkl'%(n_trees,selected_scaled_features_training.shape[0],selected_scaled_features_training.shape[1],random_seed))
     pickle.dump(model_random_forest, open(filename, 'wb'))
