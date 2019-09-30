@@ -20,11 +20,11 @@ p = argparse.ArgumentParser()
 p.add_argument('-mode', help='State if you want to train a model with training data ("train"), or load a trained model to predict category labels of unseen data ("predict")',choices=['train', 'predict'], default=None, required=True)
 p.add_argument('-features', type=str, help='Path to feature-array (numerical values required) for training or prediction',required=True)
 p.add_argument('-rescaling_factors', type=str, help='Provide path to scaling array consisting of one rescaling-factor per feature-column. Alternatively provide a single value by which to rescale all features. If this flag is not provided each feature-column will be rescaled so that all values fall between 0 and 1.',default= 0)
-p.add_argument('-labels', type=str, help='[mode "train"] Path to category labels, required for training. If required for mode "predict", this array will be used to determine the values for -n_labels and -outlabels', default= 0)
+p.add_argument('-labels', type=str, help='[mode "train"] Path to class labels, required for training. If required for mode "predict", this array will be used to determine the values for -n_labels and -outlabels', default= 0)
 p.add_argument('-feature_indeces', type=str, help='Array of feature indices to select (in case not all features should be used for training or prediction)', default= 0)
 p.add_argument('-train_instance_indices', type=str, help='[mode "train"] Array of indices for selecting which instances should be used for training', default= 0)
 p.add_argument('-test_size', type=float, help='Fraction of data set aside for testing accuracy', default= 0.2)
-p.add_argument('-test_features', type=float, help='In case you have test features in a separtate file, provide path here (disables -test_size flag)', default= 0)
+p.add_argument('-test_features', type=float, help='In case you have test features in a separate file, provide path here (disables -test_size flag)', default= 0)
 p.add_argument('-test_labels', type=float, help='Provide path to labels for the test features provided under -test_features flag', default= 0)
 p.add_argument('-trained_model', type=str, help='[mode "predict"] Path to model weights of previously trained network', default= 0)
 p.add_argument('-outpath', type=str, help='Provide output path where all output files will be stored', default= 0)
@@ -36,19 +36,20 @@ p.add_argument('-feature_names', type=str, help='Provide path to array containin
 args = p.parse_args()
 
 
-#args.mode = 'predict'
-#args.features = '/Users/tobias/GitHub/runForest/example_files/unknown_data.txt' #training_data.txt
-#args.labels = '/Users/tobias/GitHub/runForest/example_files/training_labels.txt'
-#args.test_size = 0.2
-#args.seed = 1234
-#args.outpath = '/Users/tobias/GitHub/runForest/example_files/'
-#args.n_trees = 10
-#args.rescaling_factors = '10'
-#args.select_n_best = 5
-#args.feature_names = '/Users/tobias/GitHub/runForest/example_files/feature_names.txt'
-#args.feature_indeces = '/Users/tobias/GitHub/runForest/example_files/final_feature_indices_training_order.txt' #manual_feature_selection_indices.txt
-#args.test_features = 0
-#args.test_labels = 0
+args.mode = 'train'
+args.features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_features_0.90.npy' #training_data.txt
+args.labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_labels_0.90.npy'
+args.test_size = 0.0
+args.seed = 1234
+args.outpath = '/Users/tobias/Desktop/test'
+args.n_trees = 10
+args.rescaling_factors = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/rescaling_array.npy'
+args.select_n_best = 0
+args.feature_names = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/feature_labels.npy'
+args.feature_indeces = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/P1.000C0.100_U_VSTC.txt' #manual_feature_selection_indices.txt
+args.train_instance_indices = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/instance_indices_P1.000C0.100_U_VSTC.txt'
+args.test_features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
+args.test_labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_labels_0.10.npy'
 #args.trained_model = '/Users/tobias/GitHub/runForest/example_files/trained_model_RF_10_4000_5_1234.pkl'
 #args.print_labels = 1
 
@@ -57,11 +58,37 @@ mode = args.mode
 
 # read feature array
 feature_array_path = args.features
-features = np.loadtxt(feature_array_path)
+try:
+    features = np.loadtxt(feature_array_path)
+except:
+    features = np.load(feature_array_path)
 
-# get the names for the features (if provided)
+# read class label array    
+label_array_path = args.labels
+if label_array_path:
+    try:
+        labels = np.load(label_array_path)
+    except:
+        labels = np.loadtxt(label_array_path,dtype=str)
+
+# rescaling factors (if provided)
+rescaling_factor_path = args.rescaling_factors
+try:
+    rescaling_factors = int(rescaling_factor_path)
+    if rescaling_factors == 0:
+        rescale = False
+    else:
+        rescale = True
+except:
+    rescaling_factors = np.loadtxt(rescaling_factor_path)
+    rescale = True
+
+# feature names (if provided)
 if args.feature_names:
-    feature_names = np.loadtxt(args.feature_names,dtype=str)
+    try:
+        feature_names = np.loadtxt(args.feature_names,dtype=str)
+    except:
+        feature_names = np.load(args.feature_names)
 else:
     feature_names = np.arange(features.shape[1]).astype(str)    
 remaining_feature_indices = np.arange(features.shape[1])
@@ -72,14 +99,15 @@ if args.feature_indeces:
     features = features[:,feature_indeces]
     feature_names = feature_names[feature_indeces]
     remaining_feature_indices = feature_indeces
+    rescaling_factors = rescaling_factors[feature_indeces]
 
-# rescale array
-rescaling_factor_path = args.rescaling_factors
-try:
-    rescaling_factors = int(rescaling_factor_path)
-except:
-    rescaling_factors = np.loadtxt(rescaling_factor_path)
-if rescaling_factors:
+# select the user defined instances, if provided
+if args.train_instance_indices:
+    train_instance_indices = np.loadtxt(args.train_instance_indices,dtype=int)
+    features = features[train_instance_indices,:]
+    labels = labels[train_instance_indices]
+    
+if rescale:
     # if rescalign factors are provided, rescale the array accordingly
     scaled_features = features/rescaling_factors
 else:
@@ -87,14 +115,6 @@ else:
     scaler = MinMaxScaler()
     scaler.fit(features)
     scaled_features = scaler.transform(features)
-
-# read category label array    
-label_array_path = args.labels
-if label_array_path:
-    try:
-        labels = np.load(label_array_path)
-    except:
-        labels = np.loadtxt(label_array_path,dtype=str)
 
 # read other model settings
 select_n_best = int(args.select_n_best)
@@ -113,7 +133,6 @@ else:
 np.random.seed(random_seed)
 
 
-
 if mode =='train':
     # define training and test set for evaluation
     if not args.test_features:
@@ -125,12 +144,14 @@ if mode =='train':
         if not args.test_features and args.test_labels:
             exit('Please provide -test_labels flag when using -test_features. Alternatively choose -test_size and remove -test_features flag, for runForest to split the input array into training and test set internally.')
         try:
-            scaled_features_test = np.load(args.test_features)
+            features_test = np.load(args.test_features)
             labels_test = np.load(args.test_labels)
         except:
-            scaled_features_test = np.loadtxt(args.test_features)
-            labels_test = np.loadtxt(args.test_labels)            
-    
+            features_test = np.loadtxt(args.test_features)
+            labels_test = np.loadtxt(args.test_labels)
+        selected_features_test = features_test[:,remaining_feature_indices]
+        scaled_features_test = selected_features_test/rescaling_factors
+
     # select the best labels from training and test array
     if select_n_best:
         # if train, train RF and export feature-weights
