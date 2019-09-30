@@ -36,22 +36,22 @@ p.add_argument('-feature_names', type=str, help='Provide path to array containin
 args = p.parse_args()
 
 
-args.mode = 'train'
-args.features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_features_0.90.npy' #training_data.txt
-args.labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_labels_0.90.npy'
-args.test_size = 0.0
-args.seed = 1234
-args.outpath = '/Users/tobias/Desktop/test'
-args.n_trees = 10
-args.rescaling_factors = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/rescaling_array.npy'
-args.select_n_best = 0
-args.feature_names = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/feature_labels.npy'
-args.feature_indeces = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/P1.000C0.100_U_VSTC.txt' #manual_feature_selection_indices.txt
-args.train_instance_indices = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/instance_indices_P1.000C0.100_U_VSTC.txt'
-args.test_features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
-args.test_labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_labels_0.10.npy'
-#args.trained_model = '/Users/tobias/GitHub/runForest/example_files/trained_model_RF_10_4000_5_1234.pkl'
-#args.print_labels = 1
+#args.mode = 'train'
+#args.features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_features_0.90.npy' #training_data.txt
+#args.labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_labels_0.90.npy'
+#args.test_size = 0.0
+#args.seed = 1234
+#args.outpath = '/Users/tobias/Desktop/test'
+#args.n_trees = 10
+#args.rescaling_factors = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/rescaling_array.npy'
+#args.select_n_best = 0
+#args.feature_names = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/feature_labels.npy'
+#args.feature_indeces = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/P1.000C0.100_U_VSTC.txt' #manual_feature_selection_indices.txt
+#args.train_instance_indices = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/instance_indices_P1.000C0.100_U_VSTC.txt'
+#args.test_features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
+#args.test_labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_labels_0.10.npy'
+##args.trained_model = '/Users/tobias/GitHub/runForest/example_files/trained_model_RF_10_4000_5_1234.pkl'
+##args.print_labels = 1
 
 # select mode
 mode = args.mode
