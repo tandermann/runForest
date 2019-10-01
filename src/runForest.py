@@ -21,7 +21,7 @@ p.add_argument('-mode', help='State if you want to train a model with feature da
 p.add_argument('-features', type=str, help='Path to feature-array (numerical values required) for training or prediction',required=True)
 p.add_argument('-rescaling_factors', type=str, help='Provide path to scaling array consisting of one rescaling-factor per feature-column. Alternatively provide a single value by which to rescale all features. If this flag is not provided each feature-column will be rescaled so that all values fall between 0 and 1.',default= 0)
 p.add_argument('-labels', type=str, help='[mode "train"] Path to class labels, required for training. If required for mode "predict", this array will be used to determine the values for -n_labels and -outlabels', default= 0)
-p.add_argument('-feature_indeces', type=str, help='Array of feature indices to select (in case not all features should be used for training or prediction)', default= 0)
+p.add_argument('-feature_indices', type=str, help='Array of feature indices to select (in case not all features should be used for training or prediction)', default= 0)
 p.add_argument('-train_instance_indices', type=str, help='[mode "train"] Array of indices for selecting which instances should be used for training', default= 0)
 p.add_argument('-test_size', type=float, help='Fraction of data set aside for testing accuracy', default= 0.2)
 p.add_argument('-test_features', type=str, help='In case you have test features in a separate file, provide path here (disables -test_size flag)', default= 0)
@@ -36,22 +36,22 @@ p.add_argument('-feature_names', type=str, help='Provide path to array containin
 args = p.parse_args()
 
 
-#args.mode = 'train'
-#args.features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_features_0.90.npy' #training_data.txt
+#args.mode = 'predict'
+#args.features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
 #args.labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/training_labels_0.90.npy'
-#args.test_size = 0.0
+##args.test_size = 0.0
 #args.seed = 1234
-#args.outpath = '/Users/tobias/Desktop/test'
+#args.outpath = '/Users/tobias/Desktop/test_predict'
 #args.n_trees = 10
 #args.rescaling_factors = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/rescaling_array.npy'
 #args.select_n_best = 0
-#args.feature_names = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/feature_labels.npy'
-#args.feature_indeces = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/P1.000C0.100_U_VSTC.txt' #manual_feature_selection_indices.txt
-#args.train_instance_indices = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/instance_indices_P1.000C0.100_U_VSTC.txt'
-#args.test_features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
-#args.test_labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_labels_0.10.npy'
-##args.trained_model = '/Users/tobias/GitHub/runForest/example_files/trained_model_RF_10_4000_5_1234.pkl'
-##args.print_labels = 1
+#args.feature_names = 0#'/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/feature_files/training_features/feature_labels.npy'
+#args.feature_indices = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/P1.000C0.100_U_VSTC.txt' #manual_feature_selection_indices.txt
+#args.train_instance_indices = 0#'/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/target_indices/instance_indices_P1.000C0.100_U_VSTC.txt'
+##args.test_features = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_features_0.10.npy'
+##args.test_labels = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/split_feature_arrays/test_labels_0.10.npy'
+#args.trained_model = '/Users/tobias/GitHub/paleovegetation/results/main_pipeline_out/area_-180_-52_25_80/model_out_seed_1234/trained_models/RF/trained_model_RF_10_1396_10_1234.pkl'
+#args.print_labels = 1
 
 # select mode
 mode = args.mode
@@ -94,12 +94,12 @@ else:
 remaining_feature_indices = np.arange(features.shape[1])
 
 # select the user defined features, if provided
-if args.feature_indeces:
-    feature_indeces = np.loadtxt(args.feature_indeces,dtype=int)
-    features = features[:,feature_indeces]
-    feature_names = feature_names[feature_indeces]
-    remaining_feature_indices = feature_indeces
-    rescaling_factors = rescaling_factors[feature_indeces]
+if args.feature_indices:
+    feature_indices = np.loadtxt(args.feature_indices,dtype=int)
+    features = features[:,feature_indices]
+    feature_names = feature_names[feature_indices]
+    remaining_feature_indices = feature_indices
+    rescaling_factors = rescaling_factors[feature_indices]
 
 # select the user defined instances, if provided
 if args.train_instance_indices:
@@ -137,7 +137,13 @@ if mode =='train':
     # define training and test set for evaluation
     if not args.test_features:
         test_size = args.test_size
-        scaled_features_training, scaled_features_test, labels_training, labels_test = train_test_split(scaled_features, labels, test_size=test_size, random_state=random_seed,shuffle=True)
+        if test_size == 0:
+            scaled_features_training = scaled_features
+            labels_training = labels
+            scaled_features_test = np.array([])
+            labels_test = np.array([])
+        else:
+            scaled_features_training, scaled_features_test, labels_training, labels_test = train_test_split(scaled_features, labels, test_size=test_size, random_state=random_seed,shuffle=True)
     else:
         scaled_features_training = scaled_features
         labels_training = labels
@@ -164,7 +170,7 @@ if mode =='train':
         if len(feature_importances) >= select_n_best:
             pass
         else:
-            print('Warning: Searching for %i best features, but only %i features were found. Proceeding selecting all features (check usage of -feature_indeces flag and input array dimensions).'%(select_n_best,len(feature_importances)))
+            print('Warning: Searching for %i best features, but only %i features were found. Proceeding selecting all features (check usage of -feature_indices flag and input array dimensions).'%(select_n_best,len(feature_importances)))
         # sort the 2D array by feature_importances
         sortedArr = stacked_labels_and_weights[stacked_labels_and_weights[:,1].argsort()]
         best_features = sortedArr[-select_n_best:,:][:,0][::-1]
@@ -212,15 +218,19 @@ if mode =='predict':
     except:
         guessed_labels = loaded_model.predict(scaled_features)
     # print guessed labels to file
+    if args.feature_indices:
+        model_name_string = '_'+os.path.basename(args.feature_indices).replace('.txt','')
+    else:
+        model_name_string = ''
     if args.print_labels:
         try:
             guessed_labels = guessed_labels.astype(int)
-            np.savetxt(os.path.join(outpath,'guessed_labels.txt'),guessed_labels,fmt='%i')
+            np.savetxt(os.path.join(outpath,'labels%s.txt'%model_name_string),guessed_labels,fmt='%i')
         except:
-            np.savetxt(os.path.join(outpath,'guessed_labels.txt'),guessed_labels,fmt='%s')
+            np.savetxt(os.path.join(outpath,'labels%s.txt'%model_name_string),guessed_labels,fmt='%s')
     # calculate probabilities
     label_probabilities = loaded_model.predict_proba(scaled_features)
-    np.savetxt(os.path.join(outpath,'guessed_label_probs.txt'),label_probabilities,fmt='%.4f')
+    np.savetxt(os.path.join(outpath,'label_probabilities%s.txt'%model_name_string),label_probabilities,delimiter='\t',fmt='%.4f',)
     print('Finished estimating class labels for input data. Written to %s' %outpath)
     
     
